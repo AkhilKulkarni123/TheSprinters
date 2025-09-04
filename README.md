@@ -10,6 +10,8 @@ This GitHub Pages repository can be customized by the blogger to support compute
 1. Always push changed at least 1 day before checkpoint
 2. Make a plan and structured checklists of goals and tasks for the project.
 
+# Tagline
+
 ## Student Requirements
 
 HS students will have the opportunity to create their personal GitHub Pages repository as they progress through their coursework.
