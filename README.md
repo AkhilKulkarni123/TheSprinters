@@ -11,6 +11,7 @@ This GitHub Pages repository can be customized by the blogger to support compute
 2. Make a plan and structured checklists of goals and tasks for the project.
 
 # Tagline
+Debugging the track, no looking back.
 
 ## Student Requirements
 
