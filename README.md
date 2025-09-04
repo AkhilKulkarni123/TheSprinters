@@ -8,7 +8,7 @@ This GitHub Pages repository can be customized by the blogger to support compute
 
 ## TheSprinters Agile Philosophy
 1. Always push changed at least 1 day before checkpoint
-2. 
+2. Make a plan and structured checklists of goals and tasks for the project.
 
 ## Student Requirements
 
