@@ -6,11 +6,11 @@ This GitHub Pages repository can be customized by the blogger to support compute
 
 "Open Coding Society's instructional model is grounded in **Connectivism**, recognizing that learning happens through diverse networks of people, platforms, and AI. OCS is refining `pages` using **Merrill's structure**, deepening learning through **Fink**, ensuring access via **UDL**, and supporting our classroom through **Agile and Design Thinking ceremonies**, with a touch of **Gagné** to focus each classroom day. OCS wants to create projects that support learning for today's digital, open, and connected world."
 
-## TheSprinters Agile Philosophy
+# TheSprinters Agile Philosophy
 1. Always push changed at least 1 day before checkpoint
 2. Make a plan and structured checklists of goals and tasks for the project.
 
-# Tagline
+## Tagline
 Debugging the track, no looking back.
 
 ## Student Requirements
