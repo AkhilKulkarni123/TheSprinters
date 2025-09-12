@@ -116,3 +116,8 @@ minima:
     - navigation/section/csa.md 
     - navigation/blog.md
     - navigation/search.md
+    - navigation/games/Flappybird.md
+    - navigation/games/Snake.md
+    - navigation/games/tictactoe.md
+    - navigation/games/Pacman.md
+    - navigation/games/Geodash.md

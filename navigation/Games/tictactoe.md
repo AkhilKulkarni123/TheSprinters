@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: post
 title: Tic Tac Toe Game
 permalink: /ttt
 ---
