@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Snake Game
-permalink: /snake
+permalink: /snakes
 ---
 
 <style>

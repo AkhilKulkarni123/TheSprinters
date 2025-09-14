@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: post
 title: Rock Paper Scissors
 permalink: /rps/
 ---
