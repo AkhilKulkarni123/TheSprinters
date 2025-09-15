@@ -121,3 +121,4 @@ minima:
     - navigation/games/tictactoe.md
     - navigation/games/Pacman.md
     - navigation/games/Geodash.md
+    - navigation/Games/Hangman.md
