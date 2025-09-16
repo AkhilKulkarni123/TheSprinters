@@ -122,3 +122,6 @@ minima:
     - navigation/games/Pacman.md
     - navigation/games/Geodash.md
     - navigation/Games/Hangman.md
+    - navigation/Games/Wordle.md
+    - navigation/Games/API.md
+
