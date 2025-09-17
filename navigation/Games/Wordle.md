@@ -1,553 +1,309 @@
 ---
 layout: post
-title: Wordle Game
-permalink: /wordle/
+title: Word Game
+permalink: /word/
 ---
-
 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wordle Game</title>
+    <title>Word Typing Game (Updated)</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        #wordCanvas { 
+            border: 10px solid #000;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-        }
-
-        .game-container {
+        
+        h2 {
             text-align: center;
-            max-width: 500px;
-            width: 100%;
-            padding: 20px;
+            margin-top: 20px;
         }
-
-        .title {
-            font-size: 3rem;
-            font-weight: bold;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            letter-spacing: 2px;
-        }
-
-        .game-board {
-            display: grid;
-            grid-template-rows: repeat(6, 1fr);
-            gap: 5px;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-        }
-
-        .row {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 5px;
-        }
-
-        .cell {
-            width: 60px;
-            height: 60px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: white;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-        }
-
-        .cell.filled {
-            border-color: rgba(255, 255, 255, 0.6);
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
-        }
-
-        .cell.correct {
-            background: #6aaa64;
-            border-color: #6aaa64;
-            animation: flip 0.6s ease-in-out;
-        }
-
-        .cell.present {
-            background: #c9b458;
-            border-color: #c9b458;
-            animation: flip 0.6s ease-in-out;
-        }
-
-        .cell.absent {
-            background: #787c7e;
-            border-color: #787c7e;
-            animation: flip 0.6s ease-in-out;
-        }
-
-        @keyframes flip {
-            0% { transform: rotateX(0); }
-            50% { transform: rotateX(-90deg); }
-            100% { transform: rotateX(0); }
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-
-        .cell.bounce {
-            animation: bounce 0.5s;
-        }
-
-        .keyboard {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .keyboard-row {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .key {
-            padding: 12px 8px;
-            min-width: 43px;
-            background: rgba(255, 255, 255, 0.2);
+        #options {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
             border: none;
-            border-radius: 6px;
+            background-color: #007BFF;
             color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(5px);
-        }
-
-        .key:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.05);
-        }
-
-        .key:active {
-            transform: scale(0.95);
-        }
-
-        .key.wide {
-            min-width: 65px;
-            font-size: 12px;
-        }
-
-        .key.correct {
-            background: #6aaa64;
-        }
-
-        .key.present {
-            background: #c9b458;
-        }
-
-        .key.absent {
-            background: #787c7e;
-        }
-
-        .message {
-            font-size: 1.2rem;
-            margin: 20px 0;
-            min-height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .win {
-            color: #6aaa64;
-            font-weight: bold;
-            animation: bounce 0.5s;
-        }
-
-        .lose {
-            color: #f87171;
-            font-weight: bold;
-        }
-
-        .new-game-btn {
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 25px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .new-game-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .invalid {
-            animation: shake 0.5s;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1 class="title">WORDLE</h1>
-        
-        <div class="game-board" id="board">
-            <!-- Rows will be generated by JavaScript -->
-        </div>
+    <h2 style="display: inline-block; margin-right: auto;">Word Game</h2>
+    <p>Select a game mode (string length) from the options menu and try to type the prompt as quickly and accurately as possible!</p>
+    <button style="float: right;" id="options">Options</button>
+    <p>WPM: <span class="wpm"></span></p>
+    <p>Accuracy: <span class="accuracy"></span></p>
 
-        <div class="keyboard" id="keyboard">
-            <div class="keyboard-row">
-                <button class="key" data-key="Q">Q</button>
-                <button class="key" data-key="W">W</button>
-                <button class="key" data-key="E">E</button>
-                <button class="key" data-key="R">R</button>
-                <button class="key" data-key="T">T</button>
-                <button class="key" data-key="Y">Y</button>
-                <button class="key" data-key="U">U</button>
-                <button class="key" data-key="I">I</button>
-                <button class="key" data-key="O">O</button>
-                <button class="key" data-key="P">P</button>
-            </div>
-            <div class="keyboard-row">
-                <button class="key" data-key="A">A</button>
-                <button class="key" data-key="S">S</button>
-                <button class="key" data-key="D">D</button>
-                <button class="key" data-key="F">F</button>
-                <button class="key" data-key="G">G</button>
-                <button class="key" data-key="H">H</button>
-                <button class="key" data-key="J">J</button>
-                <button class="key" data-key="K">K</button>
-                <button class="key" data-key="L">L</button>
-            </div>
-            <div class="keyboard-row">
-                <button class="key wide" data-key="ENTER">ENTER</button>
-                <button class="key" data-key="Z">Z</button>
-                <button class="key" data-key="X">X</button>
-                <button class="key" data-key="C">C</button>
-                <button class="key" data-key="V">V</button>
-                <button class="key" data-key="B">B</button>
-                <button class="key" data-key="N">N</button>
-                <button class="key" data-key="M">M</button>
-                <button class="key wide" data-key="BACKSPACE">⌫</button>
-            </div>
-        </div>
-
-        <div class="message" id="message"></div>
-        <button class="new-game-btn" id="newGameBtn" onclick="newGame()">New Game</button>
-    </div>
+    <canvas id="wordCanvas" width="800" height="200"></canvas>
 
     <script>
-        // Word list - you can expand this
-        const WORDS = [
-            'ABOUT', 'ABOVE', 'ABUSE', 'ACTOR', 'ACUTE', 'ADMIT', 'ADOPT', 'ADULT', 'AFTER', 'AGAIN',
-            'AGENT', 'AGREE', 'AHEAD', 'ALARM', 'ALBUM', 'ALERT', 'ALIEN', 'ALIGN', 'ALIKE', 'ALIVE',
-            'ALLOW', 'ALONE', 'ALONG', 'ALTER', 'AMONG', 'ANGER', 'ANGLE', 'ANGRY', 'APART', 'APPLE',
-            'APPLY', 'ARENA', 'ARGUE', 'ARISE', 'ARRAY', 'ARROW', 'ASIDE', 'ASSET', 'AVOID', 'AWAKE',
-            'AWARD', 'AWARE', 'BADLY', 'BAKER', 'BASES', 'BASIC', 'BEACH', 'BEGAN', 'BEGIN', 'BEING',
-            'BELOW', 'BENCH', 'BILLY', 'BIRTH', 'BLACK', 'BLAME', 'BLIND', 'BLOCK', 'BLOOD', 'BOARD',
-            'BOOST', 'BOOTH', 'BOUND', 'BRAIN', 'BRAND', 'BREAD', 'BREAK', 'BREED', 'BRIEF', 'BRING',
-            'BROAD', 'BROKE', 'BROWN', 'BUILD', 'BUILT', 'BUYER', 'CABLE', 'CALIF', 'CARRY', 'CATCH',
-            'CAUSE', 'CHAIN', 'CHAIR', 'CHAOS', 'CHARM', 'CHART', 'CHASE', 'CHEAP', 'CHECK', 'CHEST',
-            'CHIEF', 'CHILD', 'CHINA', 'CHOSE', 'CIVIL', 'CLAIM', 'CLASS', 'CLEAN', 'CLEAR', 'CLICK',
-            'CLIMB', 'CLOCK', 'CLOSE', 'CLOUD', 'COACH', 'COAST', 'COULD', 'COUNT', 'COURT', 'COVER',
-            'CRAFT', 'CRASH', 'CRAZY', 'CREAM', 'CRIME', 'CROSS', 'CROWD', 'CROWN', 'CRUDE', 'CURVE',
-            'CYCLE', 'DAILY', 'DANCE', 'DATED', 'DEALT', 'DEATH', 'DEBUT', 'DELAY', 'DEPTH', 'DOING',
-            'DOUBT', 'DOZEN', 'DRAFT', 'DRAMA', 'DRANK', 'DREAM', 'DRESS', 'DRILL', 'DRINK', 'DRIVE',
-            'DROVE', 'DYING', 'EAGER', 'EARLY', 'EARTH', 'EIGHT', 'ELITE', 'EMPTY', 'ENEMY', 'ENJOY',
-            'ENTER', 'ENTRY', 'EQUAL', 'ERROR', 'EVENT', 'EVERY', 'EXACT', 'EXIST', 'EXTRA', 'FAITH',
-            'FALSE', 'FAULT', 'FIBER', 'FIELD', 'FIFTH', 'FIFTY', 'FIGHT', 'FINAL', 'FIRST', 'FIXED',
-            'FLASH', 'FLEET', 'FLOOR', 'FLUID', 'FOCUS', 'FORCE', 'FORTH', 'FORTY', 'FORUM', 'FOUND',
-            'FRAME', 'FRANK', 'FRAUD', 'FRESH', 'FRONT', 'FRUIT', 'FULLY', 'FUNNY', 'GIANT', 'GIVEN',
-            'GLASS', 'GLOBE', 'GOING', 'GRACE', 'GRADE', 'GRAND', 'GRANT', 'GRASS', 'GRAVE', 'GREAT',
-            'GREEN', 'GROSS', 'GROUP', 'GROWN', 'GUARD', 'GUESS', 'GUEST', 'GUIDE', 'HAPPY', 'HARRY',
-            'HEART', 'HEAVY', 'HENCE', 'HENRY', 'HORSE', 'HOTEL', 'HOUSE', 'HUMAN', 'IDEAL', 'IMAGE',
-            'INDEX', 'INNER', 'INPUT', 'ISSUE', 'JAPAN', 'JIMMY', 'JOINT', 'JONES', 'JUDGE', 'KNOWN',
-            'LABEL', 'LARGE', 'LASER', 'LATER', 'LAUGH', 'LAYER', 'LEARN', 'LEASE', 'LEAST', 'LEAVE',
-            'LEGAL', 'LEVEL', 'LEWIS', 'LIGHT', 'LIMIT', 'LINKS', 'LIVES', 'LOCAL', 'LOGIC', 'LOOSE',
-            'LOWER', 'LUCKY', 'LUNCH', 'LYING', 'MAGIC', 'MAJOR', 'MAKER', 'MARCH', 'MARIA', 'MATCH',
-            'MAYBE', 'MAYOR', 'MEANT', 'MEDIA', 'METAL', 'MIGHT', 'MINOR', 'MINUS', 'MIXED', 'MODEL',
-            'MONEY', 'MONTH', 'MORAL', 'MOTOR', 'MOUNT', 'MOUSE', 'MOUTH', 'MOVED', 'MOVIE', 'MUSIC',
-            'NEEDS', 'NEVER', 'NEWLY', 'NIGHT', 'NOISE', 'NORTH', 'NOTED', 'NOVEL', 'NURSE', 'OCCUR',
-            'OCEAN', 'OFFER', 'OFTEN', 'ORDER', 'OTHER', 'OUGHT', 'PAINT', 'PANEL', 'PAPER', 'PARTY',
-            'PEACE', 'PETER', 'PHASE', 'PHONE', 'PHOTO', 'PIANO', 'PICKED', 'PIECE', 'PILOT', 'PITCH',
-            'PLACE', 'PLAIN', 'PLANE', 'PLANT', 'PLATE', 'POINT', 'POUND', 'POWER', 'PRESS', 'PRICE',
-            'PRIDE', 'PRIME', 'PRINT', 'PRIOR', 'PRIZE', 'PROOF', 'PROUD', 'PROVE', 'QUEEN', 'QUICK',
-            'QUIET', 'QUITE', 'RADIO', 'RAISE', 'RANGE', 'RAPID', 'RATIO', 'REACH', 'READY', 'REALM',
-            'REBEL', 'REFER', 'RELAX', 'RELAY', 'REPLY', 'RIGHT', 'RIGID', 'RIVAL', 'RIVER', 'ROBIN',
-            'ROGER', 'ROMAN', 'ROUGH', 'ROUND', 'ROUTE', 'ROYAL', 'RURAL', 'SCALE', 'SCENE', 'SCOPE',
-            'SCORE', 'SENSE', 'SERVE', 'SEVEN', 'SHALL', 'SHAPE', 'SHARE', 'SHARP', 'SHEET', 'SHELF',
-            'SHELL', 'SHIFT', 'SHINE', 'SHIRT', 'SHOCK', 'SHOOT', 'SHORT', 'SHOWN', 'SIGHT', 'SILLY',
-            'SINCE', 'SIXTH', 'SIXTY', 'SIZED', 'SKILL', 'SLEEP', 'SLIDE', 'SMALL', 'SMART', 'SMILE',
-            'SMITH', 'SMOKE', 'SNAKE', 'SNOW', 'SOLAR', 'SOLID', 'SOLVE', 'SORRY', 'SOUND', 'SOUTH',
-            'SPACE', 'SPARE', 'SPEAK', 'SPEED', 'SPEND', 'SPENT', 'SPLIT', 'SPOKE', 'SPORT', 'SQUAD',
-            'STAFF', 'STAGE', 'STAKE', 'STAND', 'START', 'STATE', 'STEAM', 'STEEL', 'STEEP', 'STEER',
-            'STICK', 'STILL', 'STOCK', 'STONE', 'STOOD', 'STORE', 'STORM', 'STORY', 'STRIP', 'STUCK',
-            'STUDY', 'STUFF', 'STYLE', 'SUGAR', 'SUITE', 'SUPER', 'SWEET', 'SWIFT', 'SWING', 'SWISS',
-            'TABLE', 'TAKEN', 'TASTE', 'TAXES', 'TEACH', 'TEAM', 'TERRY', 'TEXAS', 'THANK', 'THEFT',
-            'THEIR', 'THEME', 'THERE', 'THESE', 'THICK', 'THING', 'THINK', 'THIRD', 'THOSE', 'THREE',
-            'THREW', 'THROW', 'THUMB', 'THUS', 'TIGHT', 'TIMER', 'TIRED', 'TITLE', 'TODAY', 'TOKEN',
-            'TOMMY', 'TOPIC', 'TOTAL', 'TOUCH', 'TOUGH', 'TOWER', 'TRACK', 'TRADE', 'TRAIL', 'TRAIN',
-            'TREAT', 'TREND', 'TRIAL', 'TRIBE', 'TRICK', 'TRIED', 'TRIES', 'TRUCK', 'TRULY', 'TRUNK',
-            'TRUST', 'TRUTH', 'TWICE', 'TWIST', 'TYLER', 'ULTRA', 'UNCLE', 'UNDER', 'UNDUE', 'UNION',
-            'UNITY', 'UNTIL', 'UPPER', 'UPSET', 'URBAN', 'USAGE', 'USUAL', 'VALID', 'VALUE', 'VIDEO',
-            'VIRUS', 'VISIT', 'VITAL', 'VOCAL', 'VOICE', 'WASTE', 'WATCH', 'WATER', 'WHEEL', 'WHERE',
-            'WHICH', 'WHILE', 'WHITE', 'WHOLE', 'WHOSE', 'WOMAN', 'WOMEN', 'WORLD', 'WORRY', 'WORSE',
-            'WORST', 'WORTH', 'WOULD', 'WRITE', 'WRONG', 'WROTE', 'YIELD', 'YOUNG', 'YOURS', 'YOUTH'
-        ];
+        const wordCanvas = document.getElementById('wordCanvas');
+        const wordCtx = wordCanvas.getContext('2d');
+        const optionsButton = document.getElementById('options');
 
-        let currentWord = '';
-        let currentGuess = '';
-        let currentRow = 0;
-        let gameEnded = false;
-        let keyboardState = {};
+        let currentString = "";
+        let userInput = "";
+        let startTime = null;
+        let finished = false;
+        let mistakes = 0;
 
-        // Initialize the game
-        function init() {
-            createBoard();
-            setupKeyboard();
-            newGame();
+        // === Hack #1: Progress Bar ===
+        const progressBar = document.createElement('div');
+        progressBar.style.width = '0%';
+        progressBar.style.height = '20px';
+        progressBar.style.backgroundColor = '#28a745';
+        progressBar.style.marginTop = '10px';
+        progressBar.style.borderRadius = '5px';
+
+        const progressContainer = document.createElement('div');
+        progressContainer.style.width = '800px';
+        progressContainer.style.height = '20px';
+        progressContainer.style.backgroundColor = '#ddd';
+        progressContainer.style.margin = '10px auto';
+        progressContainer.style.borderRadius = '5px';
+        progressContainer.appendChild(progressBar);
+
+        document.body.insertBefore(progressContainer, wordCanvas.nextSibling);
+
+        function updateProgress(prompt, input) {
+            const progressPercent = (input.length / prompt.length) * 100;
+            progressBar.style.width = progressPercent + '%';
         }
 
-        function createBoard() {
-            const board = document.getElementById('board');
-            board.innerHTML = '';
-            
-            for (let i = 0; i < 6; i++) {
-                const row = document.createElement('div');
-                row.className = 'row';
-                row.id = `row-${i}`;
-                
-                for (let j = 0; j < 5; j++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    cell.id = `cell-${i}-${j}`;
-                    row.appendChild(cell);
-                }
-                
-                board.appendChild(row);
-            }
+        // === Hack #3: Dark Mode Toggle ===
+        const darkModeButton = document.createElement('button');
+        darkModeButton.textContent = 'Toggle Dark Mode';
+        darkModeButton.style.display = 'block';
+        darkModeButton.style.margin = '20px auto';
+        darkModeButton.style.padding = '10px 20px';
+        darkModeButton.style.backgroundColor = '#444';
+        darkModeButton.style.color = '#fff';
+        darkModeButton.style.border = 'none';
+        darkModeButton.style.borderRadius = '5px';
+        document.body.insertBefore(darkModeButton, progressContainer);
+
+        let darkMode = false;
+        darkModeButton.addEventListener('click', () => {
+            darkMode = !darkMode;
+            document.body.style.backgroundColor = darkMode ? '#121212' : '#ffffff';
+            document.body.style.color = darkMode ? '#e0e0e0' : '#000000';
+            wordCanvas.style.borderColor = darkMode ? '#ffffff' : '#000000';
+        });
+
+        // String sets
+        const short_strings = ["The quick brown fox jumps over the lazy dog", "Pack my box with five dozen liquor jugs", "How quickly daft jumping zebras vex", "Jinxed wizards pluck ivy from the quilt", "Bright vixens jump, dozy fowl quack", "Sphinx of black quartz, judge my vow", "Two driven jocks help fax my big quiz", "Five quacking zephyrs jolt my wax bed", "The five boxing wizards jump quickly", "Jackdaws love my big sphinx of quartz"];
+        const medium_strings = ["Amazingly few discotheques provide jukeboxes", "Back in June we delivered oxygen equipment of the same size", "The public was amazed to view the quickness and dexterity of the juggler", "Jovial zanies quickly gave up their quest for the exotic fish", "The wizard quickly jinxed the gnomes before they vaporized", "All questions asked by five watched experts amaze the judge", "The job requires extra pluck and zeal from every young wage earner", "Crazy Frederick bought many very exquisite opal jewels", "We promptly judged antique ivory buckles for the next prize", "Sixty zippers were quickly picked from the woven jute bag"];
+        const long_strings = ["The wizard quickly jinxed the gnomes before they vaporized just beyond the village gates", "Heavy boxes perform quick waltzes and jigs while the young fox plays his fiddle nearby", "My faxed joke won a pager in the cable TV quiz show, making everyone in the room laugh", "Back in the quaint valley, jovial hikers mixed exotic fruit juice and warm bread by the campfire", "The public was amazed to view the quickness and dexterity of the juggler as he performed his tricks", "Amazingly few discotheques provide jukeboxes, making it hard for music lovers to enjoy their favorite tunes", "We promptly judged antique ivory buckles for the next prize in the competition, impressing all the judges", "Crazy Frederick bought many very exquisite opal jewels from the ancient market in the old town square", "Sixty zippers were quickly picked from the woven jute bag by the skilled tailor in the bustling city", "Back in June we delivered oxygen equipment of the same size and shape to all the hospitals in the region"];
+
+        function drawText(text) {
+            wordCtx.clearRect(0, 0, wordCanvas.width, wordCanvas.height);
+            wordCtx.font = '24px Arial';
+            wordCtx.fillStyle = '#dededeff';
+            wordCtx.textAlign = 'center';
+        
+            const maxWidth = wordCanvas.width - 20;
+            const lineHeight = 30;
+            const lines = wrapText(text, maxWidth);
+        
+            const startY = (wordCanvas.height - lines.length * lineHeight) / 2;
+            lines.forEach((line, index) => {
+                wordCtx.fillText(line, wordCanvas.width / 2, startY + index * lineHeight);
+            });
         }
-
-        function setupKeyboard() {
-            const keys = document.querySelectorAll('.key');
-            keys.forEach(key => {
-                key.addEventListener('click', () => {
-                    handleKeyPress(key.dataset.key);
-                });
-            });
-
-            document.addEventListener('keydown', (e) => {
-                const key = e.key.toUpperCase();
-                if (key === 'ENTER') {
-                    handleKeyPress('ENTER');
-                } else if (key === 'BACKSPACE') {
-                    handleKeyPress('BACKSPACE');
-                } else if (key >= 'A' && key <= 'Z') {
-                    handleKeyPress(key);
-                }
-            });
-        }
-
-        function newGame() {
-            currentWord = WORDS[Math.floor(Math.random() * WORDS.length)];
-            currentGuess = '';
-            currentRow = 0;
-            gameEnded = false;
-            keyboardState = {};
-            
-            // Clear board
-            const cells = document.querySelectorAll('.cell');
-            cells.forEach(cell => {
-                cell.textContent = '';
-                cell.className = 'cell';
-            });
-
-            // Reset keyboard
-            const keys = document.querySelectorAll('.key');
-            keys.forEach(key => {
-                key.className = key.classList.contains('wide') ? 'key wide' : 'key';
-            });
-
-            document.getElementById('message').textContent = '';
-            console.log('New word:', currentWord); // For testing - remove in production
-        }
-
-        function handleKeyPress(key) {
-            if (gameEnded) return;
-
-            if (key === 'ENTER') {
-                if (currentGuess.length === 5) {
-                    if (isValidWord(currentGuess)) {
-                        submitGuess();
-                    } else {
-                        showMessage('Not a valid word!');
-                        animateRow('invalid');
-                    }
+        
+        function wrapText(text, maxWidth) {
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+        
+            for (let i = 1; i < words.length; i++) {
+                const word = words[i];
+                const width = wordCtx.measureText(currentLine + ' ' + word).width;
+                if (width < maxWidth) {
+                    currentLine += ' ' + word;
                 } else {
-                    showMessage('Word must be 5 letters!');
-                    animateRow('invalid');
-                }
-            } else if (key === 'BACKSPACE') {
-                if (currentGuess.length > 0) {
-                    currentGuess = currentGuess.slice(0, -1);
-                    updateDisplay();
-                }
-            } else if (key >= 'A' && key <= 'Z') {
-                if (currentGuess.length < 5) {
-                    currentGuess += key;
-                    updateDisplay();
+                    lines.push(currentLine);
+                    currentLine = word;
                 }
             }
+            lines.push(currentLine);
+            return lines;
         }
 
-        function isValidWord(word) {
-            return WORDS.includes(word);
-        }
+        // === Hack #2: Highlight next character ===
+        function drawUserTextWithHighlight(prompt, input) {
+            wordCtx.clearRect(0, 0, wordCanvas.width, wordCanvas.height);
+            wordCtx.font = '24px Arial';
+            wordCtx.textAlign = 'left';
 
-        function updateDisplay() {
-            for (let i = 0; i < 5; i++) {
-                const cell = document.getElementById(`cell-${currentRow}-${i}`);
-                if (i < currentGuess.length) {
-                    cell.textContent = currentGuess[i];
-                    cell.classList.add('filled');
-                    // Add bounce animation to the newly filled cell
-                    if (i === currentGuess.length - 1) {
-                        cell.classList.add('bounce');
-                        setTimeout(() => cell.classList.remove('bounce'), 500);
-                    }
-                } else {
-                    cell.textContent = '';
-                    cell.classList.remove('filled');
-                }
-            }
-        }
+            const maxWidth = wordCanvas.width - 20;
+            const lineHeight = 30;
+            const lines = wrapText(prompt, maxWidth);
+            const startY = (wordCanvas.height - lines.length * lineHeight) / 2;
 
-        function submitGuess() {
-            const guess = currentGuess;
-            const result = checkGuess(guess);
-            
-            // Animate the reveal
-            for (let i = 0; i < 5; i++) {
-                setTimeout(() => {
-                    const cell = document.getElementById(`cell-${currentRow}-${i}`);
-                    cell.classList.add(result[i]);
-                    
-                    // Update keyboard
-                    updateKeyboard(guess[i], result[i]);
-                }, i * 100);
-            }
+            let charIndex = 0;
+            lines.forEach((line, lineIndex) => {
+                const lineY = startY + lineIndex * lineHeight;
+                const lineX = (wordCanvas.width - wordCtx.measureText(line).width) / 2;
+                wordCtx.fillStyle = '#dededeff';
+                wordCtx.fillText(line, lineX, lineY);
 
-            if (guess === currentWord) {
-                setTimeout(() => {
-                    gameEnded = true;
-                    showMessage('Congratulations! 🎉', 'win');
-                }, 500);
-            } else if (currentRow === 5) {
-                setTimeout(() => {
-                    gameEnded = true;
-                    showMessage(`Game Over! The word was: ${currentWord}`, 'lose');
-                }, 500);
-            }
+                // highlight box for the next character
+                if (charIndex <= input.length && input.length < prompt.length) {
+                    const nextChar = prompt[input.length];
+                    const before = line.slice(0, input.length - charIndex);
+                    const highlightX = lineX + wordCtx.measureText(before).width;
 
-            currentRow++;
-            currentGuess = '';
-        }
-
-        function checkGuess(guess) {
-            const result = [];
-            const wordArray = currentWord.split('');
-            const guessArray = guess.split('');
-            
-            // First pass: check for correct positions
-            for (let i = 0; i < 5; i++) {
-                if (guessArray[i] === wordArray[i]) {
-                    result[i] = 'correct';
-                    wordArray[i] = null;
-                    guessArray[i] = null;
-                }
-            }
-            
-            // Second pass: check for present letters
-            for (let i = 0; i < 5; i++) {
-                if (guessArray[i] !== null) {
-                    const index = wordArray.indexOf(guessArray[i]);
-                    if (index !== -1) {
-                        result[i] = 'present';
-                        wordArray[index] = null;
-                    } else {
-                        result[i] = 'absent';
+                    if (prompt[input.length] && line.includes(nextChar)) {
+                        wordCtx.strokeStyle = 'orange';
+                        wordCtx.lineWidth = 2;
+                        wordCtx.strokeRect(
+                            highlightX - 2,
+                            lineY - 20,
+                            wordCtx.measureText(nextChar).width + 4,
+                            24
+                        );
                     }
                 }
-            }
-            
-            return result;
+
+                // draw typed characters
+                let currentX = lineX;
+                for (let i = 0; i < line.length && charIndex < input.length; i++, charIndex++) {
+                    const char = input[charIndex];
+                    const promptChar = prompt[charIndex];
+                    const color = char === promptChar ? 'green' : 'red';
+                    wordCtx.fillStyle = color;
+                    wordCtx.fillText(char, currentX, lineY);
+                    currentX += wordCtx.measureText(promptChar).width;
+                }
+                charIndex += Math.max(0, line.length - (input.length - charIndex));
+            });
         }
 
-        function updateKeyboard(letter, status) {
-            const key = document.querySelector(`[data-key="${letter}"]`);
-            if (!key) return;
+        function updateStats(prompt, input, startTime) {
+            const totalTyped = input.length;
+            const accuracy = totalTyped > 0 ? Math.round(((totalTyped - mistakes) / totalTyped) * 100) : 100;
+            document.querySelector('.accuracy').textContent = accuracy + '%';
 
-            const currentStatus = keyboardState[letter];
-            
-            // Only update if the new status is "better" than the current one
-            if (!currentStatus || 
-                (status === 'correct') || 
-                (status === 'present' && currentStatus !== 'correct')) {
-                keyboardState[letter] = status;
-                key.classList.remove('correct', 'present', 'absent');
-                key.classList.add(status);
-            }
-        }
-
-        function animateRow(animationType) {
-            const row = document.getElementById(`row-${currentRow}`);
-            row.classList.add(animationType);
-            setTimeout(() => row.classList.remove(animationType), 500);
-        }
-
-        function showMessage(text, className = '') {
-            const messageEl = document.getElementById('message');
-            messageEl.textContent = text;
-            messageEl.className = `message ${className}`;
-            
-            if (!className) {
-                setTimeout(() => {
-                    messageEl.textContent = '';
-                }, 3000);
+            if (startTime) {
+                const elapsed = (Date.now() - startTime) / 1000 / 60;
+                const words = prompt.length / 5;
+                const wpm = elapsed > 0 ? Math.round(words / elapsed) : 0;
+                document.querySelector('.wpm').textContent = wpm;
+            } else {
+                document.querySelector('.wpm').textContent = '0';
             }
         }
 
-        // Initialize the game when the page loads
-        init();
+        function finishGame(prompt, input, startTime) {
+            finished = true;
+            updateStats(prompt, input, startTime);
+            alert('Finished! WPM: ' + document.querySelector('.wpm').textContent + ', Accuracy: ' + document.querySelector('.accuracy').textContent);
+        }
+
+        function startGame() {
+            if (currentString === "") {
+                alert("Please select a string length from the options menu.");
+                return;
+            }
+
+            let stringArray;
+            if (currentString === "short_strings") {
+                stringArray = short_strings;
+            } else if (currentString === "medium_strings") {
+                stringArray = medium_strings;
+            } else if (currentString === "long_strings") {
+                stringArray = long_strings;
+            }
+
+            const randomIndex = Math.floor(Math.random() * stringArray.length);
+            const selectedString = stringArray[randomIndex];
+            userInput = "";
+            mistakes = 0;
+            finished = false;
+            startTime = Date.now();
+            drawText(selectedString);
+            document.querySelector('.wpm').textContent = '0';
+            document.querySelector('.accuracy').textContent = '100%';
+            progressBar.style.width = '0%';
+
+            document.onkeydown = function (e) {
+                if (finished) return;
+
+                if (e.key.length === 1 && userInput.length < selectedString.length) {
+                    const nextChar = selectedString[userInput.length];
+                    if (e.key !== nextChar) {
+                        mistakes++;
+                    }
+                    userInput += e.key;
+                } else if (e.key === 'Backspace' && userInput.length > 0) {
+                    userInput = userInput.slice(0, -1);
+                }
+
+                drawUserTextWithHighlight(selectedString, userInput);
+                updateStats(selectedString, userInput, startTime);
+                updateProgress(selectedString, userInput);
+
+                if (userInput === selectedString) {
+                    finishGame(selectedString, userInput, startTime);
+                }
+            };
+        }
+
+        // Options menu
+        optionsButton.addEventListener('click', () => {
+            const menu = document.createElement('div');
+            menu.style.position = 'absolute';
+            menu.style.width = '200px';
+            menu.style.border = '1px solid #ccc';
+            menu.style.backgroundColor = '#fff';
+            menu.style.padding = '10px';
+            menu.style.boxShadow = '0px 4px 6px rgba(0, 0, 0, 0.1)';
+            menu.style.textAlign = 'center';
+        
+            menu.style.top = `${window.innerHeight / 2 - 50}px`;
+            menu.style.left = `${window.innerWidth / 2 - 100}px`;
+        
+            const shortOption = document.createElement('button');
+            shortOption.textContent = 'Short Strings';
+            shortOption.style.display = 'block';
+            shortOption.style.margin = '10px 0';
+            shortOption.addEventListener('click', () => {
+                currentString = "short_strings";
+                startGame();
+                document.body.removeChild(menu);
+            });
+        
+            const mediumOption = document.createElement('button');
+            mediumOption.textContent = 'Medium Strings';
+            mediumOption.style.display = 'block';
+            mediumOption.style.margin = '10px 0';
+            mediumOption.addEventListener('click', () => {
+                currentString = "medium_strings";
+                startGame();
+                document.body.removeChild(menu);
+            });
+        
+            const longOption = document.createElement('button');
+            longOption.textContent = 'Long Strings';
+            longOption.style.display = 'block';
+            longOption.style.margin = '10px 0';
+            longOption.addEventListener('click', () => {
+                currentString = "long_strings";
+                startGame();
+                document.body.removeChild(menu);
+            });
+        
+            menu.appendChild(shortOption);
+            menu.appendChild(mediumOption);
+            menu.appendChild(longOption);
+            document.body.appendChild(menu);
+        });
     </script>
 </body>
 </html>
