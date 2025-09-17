@@ -59,8 +59,8 @@ h1 {
 
 .game-over {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: calc(50% - 800px);
+    left: calc(50% + 300px);
     transform: translate(-50%, -50%);
     background-color: rgba(0, 0, 0, 0.8);
     color: white;
@@ -114,7 +114,7 @@ h1 {
     <div class="high-score">High Score: <span id="highScore">0</span></div>
 </div>
 
-<canvas id="gameCanvas" width="1800" height="768"></canvas>
+<canvas id="gameCanvas" width="1200" height="512"></canvas>
 
 <div class="controls">
     Use WASD or Arrow Keys to control the snake<br>
