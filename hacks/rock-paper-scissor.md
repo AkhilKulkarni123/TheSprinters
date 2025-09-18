@@ -4,8 +4,17 @@ comments: true
 hide: true
 layout: opencs
 description: Learn how to experiment with the console, elements, and see OOP in action while playing Rock paper Scissors!
-permalink: /rock-paper-scissor/
+permalink: /rps2/
 ---
+
+<style>
+body {
+  background-image: url('{{site.baseurl}}/images/SB1.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+</style>
 
 
 <div id="mainGameBox" style="max-width:700px;margin:64px auto 48px auto;position:relative;z-index:2;">
@@ -19,7 +28,7 @@ permalink: /rock-paper-scissor/
     const instructionsStyle = `
   position: relative;
   margin: 64px auto 48px auto;
-    background: linear-gradient(135deg, black, purple);
+    background: linear-gradient(135deg, black, red);
     color: white;
     padding: 30px;
     border-radius: 15px;
@@ -29,13 +38,13 @@ permalink: /rock-paper-scissor/
     max-height: 80vh;      /* added */
     overflow-y: auto;      /* added */
     font-family: 'Press Start 2P', cursive;
-    border: 3px solid purple;
-    box-shadow: 0 0 20px rgba(128, 0, 128, 0.5);
+    border: 3px solid blue;
+    box-shadow: 0 0 20px rgba(0, 0, 255, 0.5);
     text-align: center;
     `;
 
   const instructionsHTML = `
-    <h2 style="color: purple; margin-bottom: 20px;">Rock Paper Scissors SHOOT!</h2>
+    <h2 style="color: blue; margin-bottom: 20px;">Rock Paper Scissors SHOOT!</h2>
     <div style="margin-bottom: 20px;">
       <p>Play the game from your browser console!</p>
       <p>Type <code>playRPS("rock")</code>, <code>playRPS("paper")</code>, or <code>playRPS("scissors")</code></p>
@@ -43,15 +52,15 @@ permalink: /rock-paper-scissor/
     <div id="images" style="display:flex; justify-content:center; gap:20px; margin-bottom:14px;">
       <button id="rock-btn" style="background:none; border:none; padding:0; cursor:pointer;">
         <img id="rock-img" src="{{site.baseurl}}/images/rps/rock.jpg"
-             style="width:100px; border:2px solid white; border-radius:10px;">
+             style="width:100px; border:2px solid blue; border-radius:10px; box-shadow: 0 0 10px blue;">
       </button>
       <button id="paper-btn" style="background:none; border:none; padding:0; cursor:pointer;">
         <img id="paper-img" src="{{site.baseurl}}/images/rps/paper.jpeg"
-             style="width:100px; border:2px solid white; border-radius:10px;">
+             style="width:100px; border:2px solid blue; border-radius:10px; box-shadow: 0 0 10px blue;">
       </button>
       <button id="scissors-btn" style="background:none; border:none; padding:0; cursor:pointer;">
         <img id="scissors-img" src="{{site.baseurl}}/images/rps/scissors.jpeg"
-             style="width:100px; border:2px solid white; border-radius:10px;">
+             style="width:100px; border:2px solid blue; border-radius:10px; box-shadow: 0 0 10px blue;">
       </button>
     </div>
     <div style="margin-bottom:18px; font-size:1.1em; color:#ffd700;">
@@ -66,6 +75,35 @@ permalink: /rock-paper-scissor/
   container.setAttribute("style", instructionsStyle);
   container.innerHTML = instructionsHTML;
   document.getElementById("mainGameBox").appendChild(container);
+
+  // Add PvP button in bottom right corner
+  const pvpButton = document.createElement("button");
+  pvpButton.innerHTML = "Player vs Player";
+  pvpButton.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #4a90e2, #007acc);
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0, 122, 204, 0.3);
+    transition: all 0.3s ease;
+  `;
+  pvpButton.addEventListener('mouseover', () => {
+    pvpButton.style.background = 'linear-gradient(135deg, #5aa3f5, #0086e6)';
+    pvpButton.style.transform = 'translateY(-2px)';
+  });
+  pvpButton.addEventListener('mouseout', () => {
+    pvpButton.style.background = 'linear-gradient(135deg, #4a90e2, #007acc)';
+    pvpButton.style.transform = 'translateY(0)';
+  });
+  document.body.appendChild(pvpButton);
 
   // --- helper: highlight chosen image ---
   function highlightImage(id){
@@ -148,7 +186,7 @@ permalink: /rock-paper-scissor/
 
   // --- assets ---
   const bgImage = new Image();
-  bgImage.src = '{{site.baseurl}}/images/platformer/backgrounds/alien_planet1.jpg';
+  bgImage.src = '{{site.baseurl}}/images/sunlay.png';
 
   const rockImg = new Image();
   rockImg.src = '{{site.baseurl}}/images/rps/rock.jpg';
@@ -272,6 +310,99 @@ permalink: /rock-paper-scissor/
   }
   render(); // kick off the engine once
 
+  // --- PvP game state ---
+  const pvpState = {
+    active: false,
+    currentPlayer: 1,
+    player1Choice: null,
+    player2Choice: null,
+    player1Score: 0,
+    player2Score: 0
+  };
+
+  function togglePvPMode() {
+    pvpState.active = !pvpState.active;
+    if (pvpState.active) {
+      pvpButton.innerHTML = "Exit PvP";
+      pvpButton.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+      resetPvPGame();
+      updatePvPStatus();
+    } else {
+      pvpButton.innerHTML = "Player vs Player";
+      pvpButton.style.background = 'linear-gradient(135deg, #4a90e2, #007acc)';
+      document.getElementById("resultBox").innerHTML = "";
+    }
+  }
+
+  function resetPvPGame() {
+    pvpState.currentPlayer = 1;
+    pvpState.player1Choice = null;
+    pvpState.player2Choice = null;
+  }
+
+  function updatePvPStatus() {
+    if (!pvpState.active) return;
+
+    if (!pvpState.player1Choice) {
+      document.getElementById("resultBox").innerHTML = `
+        <h3 style="color: cyan;">Player 1's Turn</h3>
+        <p>Choose your move!</p>
+        <p>Score: Player 1: ${pvpState.player1Score} | Player 2: ${pvpState.player2Score}</p>
+      `;
+    } else if (!pvpState.player2Choice) {
+      document.getElementById("resultBox").innerHTML = `
+        <h3 style="color: cyan;">Player 2's Turn</h3>
+        <p>Choose your move!</p>
+        <p>Score: Player 1: ${pvpState.player1Score} | Player 2: ${pvpState.player2Score}</p>
+      `;
+    }
+  }
+
+  function processPvPRound() {
+    if (!pvpState.player1Choice || !pvpState.player2Choice) return;
+
+    let resultText, winner = null, loser = null;
+    const p1 = pvpState.player1Choice;
+    const p2 = pvpState.player2Choice;
+
+    if (p1 === p2) {
+      resultText = "It's a tie!";
+      startTie(p1);
+    } else if (
+      (p1 === "rock" && p2 === "scissors") ||
+      (p1 === "paper" && p2 === "rock") ||
+      (p1 === "scissors" && p2 === "paper")
+    ) {
+      resultText = "Player 1 Wins!";
+      pvpState.player1Score++;
+      winner = p1;
+      loser = p2;
+    } else {
+      resultText = "Player 2 Wins!";
+      pvpState.player2Score++;
+      winner = p2;
+      loser = p1;
+    }
+
+    document.getElementById("resultBox").innerHTML = `
+      <p>Player 1 chose: <b>${p1.toUpperCase()}</b></p>
+      <p>Player 2 chose: <b>${p2.toUpperCase()}</b></p>
+      <h3 style="color: cyan;">${resultText}</h3>
+      <p>Score: Player 1: ${pvpState.player1Score} | Player 2: ${pvpState.player2Score}</p>
+      <p style="color: yellow; font-size: 12px;">Click any choice to start next round</p>
+    `;
+
+    if (winner && loser) startBattle(winner, loser);
+
+    // Reset for next round
+    setTimeout(() => {
+      resetPvPGame();
+      updatePvPStatus();
+    }, 3000);
+  }
+
+  pvpButton.addEventListener('click', togglePvPMode);
+
   // --- game logic + console entry point ---
   window.playRPS = function(playerChoice){
     const choices = ["rock","paper","scissors"];
@@ -281,6 +412,22 @@ permalink: /rock-paper-scissor/
     }
     highlightImage(playerChoice+"-img");
 
+    // Handle PvP mode
+    if (pvpState.active) {
+      if (!pvpState.player1Choice) {
+        pvpState.player1Choice = playerChoice;
+        updatePvPStatus();
+        console.log(`Player 1 chose: ${playerChoice.toUpperCase()}`);
+        return;
+      } else if (!pvpState.player2Choice) {
+        pvpState.player2Choice = playerChoice;
+        console.log(`Player 2 chose: ${playerChoice.toUpperCase()}`);
+        processPvPRound();
+        return;
+      }
+    }
+
+    // Original vs Computer logic
     const computerChoice = choices[Math.floor(Math.random()*choices.length)];
     let resultText, winner=null, loser=null;
 
@@ -369,14 +516,14 @@ permalink: /rock-paper-scissor/
   window.paper = paper;
   window.scissors = scissors;
 
-  // --- inspect-learning alerts (unchanged) ---
+  // --- Button click handlers for direct gameplay ---
   document.getElementById("rock-btn").addEventListener("click", () => {
-    alert("🪨 Try in the console:\n\nrock.setBorder('4px solid lime');");
+    playRPS("rock");
   });
   document.getElementById("paper-btn").addEventListener("click", () => {
-    alert("📄 Try in the console:\n\npaper.rotate(15);");
+    playRPS("paper");
   });
   document.getElementById("scissors-btn").addEventListener("click", () => {
-    alert("✂️ Try in the console:\n\nscissors.setWidth(150);");
+    playRPS("scissors");
   });
 </script>
