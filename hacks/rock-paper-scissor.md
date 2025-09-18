@@ -9,7 +9,7 @@ permalink: /rps2/
 
 <style>
 body {
-  background-image: url('{{site.baseurl}}/images/SB1.png');
+  background-image: url('{{site.baseurl}}/images/lava.png');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
