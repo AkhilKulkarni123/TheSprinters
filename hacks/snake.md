@@ -86,7 +86,7 @@ permalink: /snake1
 
 <h2>Monkey Snake 🐵🍌</h2>
 <div class="container">
-    <p class="fs-4">Score: <span id="score_value">0</span></p>
+    <p class="fs-4">Score: <span id="score_value">0</span> | Lives: <span id="lives_value">1</span></p>
     <div class="container bg-secondary" style="text-align:center;">
         <!-- Main Menu -->
         <div id="menu" class="py-4 text-light">
@@ -124,6 +124,18 @@ permalink: /snake1
                 <input id="walloff" type="radio" name="wall" value="0"/>
                 <label for="walloff">Off</label>
             </p>
+            <p>Lives:
+                <input id="lives1" type="radio" name="lives" value="1" checked/>
+                <label for="lives1">1</label>
+                <input id="lives2" type="radio" name="lives" value="2"/>
+                <label for="lives2">2</label>
+                <input id="lives3" type="radio" name="lives" value="3"/>
+                <label for="lives3">3</label>
+                <input id="lives4" type="radio" name="lives" value="4"/>
+                <label for="lives4">4</label>
+                <input id="lives5" type="radio" name="lives" value="5"/>
+                <label for="lives5">5</label>
+            </p>
         </div>
     </div>
 </div>
@@ -139,8 +151,10 @@ permalink: /snake1
         const SCREEN_SNAKE = 0;
         const screen_snake = document.getElementById("snake");
         const ele_score = document.getElementById("score_value");
+        const ele_lives = document.getElementById("lives_value");
         const speed_setting = document.getElementsByName("speed");
         const wall_setting = document.getElementsByName("wall");
+        const lives_setting = document.getElementsByName("lives");
         // HTML Screen IDs (div)
         const SCREEN_MENU = -1, SCREEN_GAME_OVER=1, SCREEN_SETTING=2;
         const screen_menu = document.getElementById("menu");
@@ -159,9 +173,21 @@ permalink: /snake1
         let snake_dir;
         let snake_next_dir;
         let snake_speed;
-        let food = {x: 0, y: 0};
+        let food = {x: 0, y: 0, type: 0, points: 1};
+        let foodTypes = [
+            {emoji: "🍌", points: 1}, // Banana
+            {emoji: "🍎", points: 1}, // Apple
+            {emoji: "🍊", points: 1}, // Orange
+            {emoji: "🍇", points: 1}, // Grapes
+            {emoji: "🍓", points: 1}, // Strawberry
+            {emoji: "🥝", points: 1}, // Kiwi
+            {emoji: "🍑", points: 1}, // Cherry
+            {emoji: "🥭", points: 1}  // Mango
+        ];
         let score;
         let wall;
+        let lives;
+        let maxLives;
         let obstacles = []; // New: Array to store obstacles
         let backgroundColors = ["royalblue", "purple", "darkgreen", "maroon", "darkslategray", "midnightblue", "indigo", "darkred", "forestgreen", "darkorange", "crimson", "gold", "lime", "cyan", "magenta", "orange", "pink", "yellow", "red", "blue", "green", "violet", "turquoise", "coral", "salmon", "orchid", "lightseagreen", "tomato", "springgreen", "deepskyblue"];
         let currentColorIndex = 0; // Track current background color
@@ -226,6 +252,17 @@ permalink: /snake1
                     for(let i = 0; i < wall_setting.length; i++){
                         if(wall_setting[i].checked){
                             setWall(wall_setting[i].value);
+                        }
+                    }
+                });
+            }
+            // lives setting
+            setLives(1);
+            for(let i = 0; i < lives_setting.length; i++){
+                lives_setting[i].addEventListener("click", function(){
+                    for(let i = 0; i < lives_setting.length; i++){
+                        if(lives_setting[i].checked){
+                            setLives(lives_setting[i].value);
                         }
                     }
                 });
@@ -305,7 +342,7 @@ permalink: /snake1
             if(wall === 1){
                 // Wall on, Game over test
                 if (snake[0].x < 0 || snake[0].x === canvas.width / BLOCK || snake[0].y < 0 || snake[0].y === canvas.height / BLOCK){
-                    showScreen(SCREEN_GAME_OVER);
+                    loseLife();
                     return;
                 }
             }else{
@@ -330,7 +367,7 @@ permalink: /snake1
             for(let i = 1; i < snake.length; i++){
                 // Game over test
                 if (snake[0].x === snake[i].x && snake[0].y === snake[i].y){
-                    showScreen(SCREEN_GAME_OVER);
+                    loseLife();
                     return;
                 }
             }
@@ -338,7 +375,7 @@ permalink: /snake1
             // NEW: Snake vs Obstacles checker
             for(let i = 0; i < obstacles.length; i++){
                 if(checkBlock(snake[0].x, snake[0].y, obstacles[i].x, obstacles[i].y)){
-                    showScreen(SCREEN_GAME_OVER);
+                    loseLife();
                     return;
                 }
             }
@@ -346,13 +383,14 @@ permalink: /snake1
             // Snake eats food checker
             if(checkBlock(snake[0].x, snake[0].y, food.x, food.y)){
                 snake[snake.length] = {x: snake[0].x, y: snake[0].y};
-                altScore(++score);
-                
+                score += food.points;
+                altScore(score);
+
                 // Change background color to random when food is eaten
                 currentColorIndex = Math.floor(Math.random() * backgroundColors.length);
-                
+
                 addFood();
-                
+
                 // NEW: Add obstacles when score reaches 3 and every 2 points after
                 if(score >= 3 && (score - 3) % 2 === 0){
                     addObstacle();
@@ -382,7 +420,7 @@ permalink: /snake1
             }
             
             // Paint food
-            drawBanana(food.x, food.y);
+            drawFood(food.x, food.y);
             
             // NEW: Paint obstacles
             for(let i = 0; i < obstacles.length; i++){
@@ -404,6 +442,9 @@ permalink: /snake1
             // game score to zero
             score = 0;
             altScore(score);
+            // reset lives to max
+            lives = maxLives;
+            altLives(lives);
             // initial snake
             snake = [];
             snake.push({x: 0, y: 15});
@@ -456,11 +497,11 @@ permalink: /snake1
             ctx.fillText("🐵", x * BLOCK, (y * BLOCK) + BLOCK);
         }
 
-        /* Draw Banana Emoji for Food */
+        /* Draw Fruit Emoji for Food */
         /////////////////////////////////////////////////////////////
-        let drawBanana = function(x, y){
+        let drawFood = function(x, y){
             ctx.font = "10px Arial";
-            ctx.fillText("🍌", x * BLOCK, (y * BLOCK) + BLOCK);
+            ctx.fillText(foodTypes[food.type].emoji, x * BLOCK, (y * BLOCK) + BLOCK);
         }
 
         /* NEW: Draw Obstacle (Rock) */
@@ -475,7 +516,9 @@ permalink: /snake1
         let addFood = function(){
             food.x = Math.floor(Math.random() * ((canvas.width / BLOCK) - 1));
             food.y = Math.floor(Math.random() * ((canvas.height / BLOCK) - 1));
-            
+            food.type = Math.floor(Math.random() * foodTypes.length);
+            food.points = foodTypes[food.type].points;
+
             // Check against snake
             for(let i = 0; i < snake.length; i++){
                 if(checkBlock(food.x, food.y, snake[i].x, snake[i].y)){
@@ -483,7 +526,7 @@ permalink: /snake1
                     return;
                 }
             }
-            
+
             // NEW: Check against obstacles
             for(let i = 0; i < obstacles.length; i++){
                 if(checkBlock(food.x, food.y, obstacles[i].x, obstacles[i].y)){
@@ -519,6 +562,40 @@ permalink: /snake1
             wall = wall_value;
             if(wall === 0){screen_snake.style.borderColor = "#FF0000";} // Changed to red
             if(wall === 1){screen_snake.style.borderColor = "#FF0000";} // Changed to red
+        }
+
+        /////////////////////////////////////////////////////////////
+        let setLives = function(lives_value){
+            maxLives = parseInt(lives_value);
+            lives = maxLives;
+            altLives(lives);
+        }
+
+        /* Update Lives Display */
+        /////////////////////////////////////////////////////////////
+        let altLives = function(lives_val){
+            ele_lives.innerHTML = String(lives_val);
+        }
+
+        /* Lose Life Function */
+        /////////////////////////////////////////////////////////////
+        let loseLife = function(){
+            lives--;
+            altLives(lives);
+
+            if(lives <= 0){
+                showScreen(SCREEN_GAME_OVER);
+            } else {
+                // Reset snake position but keep score and obstacles
+                snake = [];
+                snake.push({x: 0, y: 15});
+                snake_next_dir = 1;
+
+                // Brief pause before continuing
+                setTimeout(function(){
+                    mainLoop();
+                }, 1000);
+            }
         }
     })();
 </script>
