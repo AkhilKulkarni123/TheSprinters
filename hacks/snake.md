@@ -7,6 +7,11 @@ permalink: /snake1
 <style>
 
     body{
+        background-image: url('images/SB1.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
     }
     .wrap{
         margin-left: auto;
@@ -158,7 +163,7 @@ permalink: /snake1
         let score;
         let wall;
         let obstacles = []; // New: Array to store obstacles
-        let backgroundColors = ["royalblue", "purple", "darkgreen", "maroon", "darkslategray", "midnightblue", "indigo", "darkred", "forestgreen", "darkorange"];
+        let backgroundColors = ["royalblue", "purple", "darkgreen", "maroon", "darkslategray", "midnightblue", "indigo", "darkred", "forestgreen", "darkorange", "crimson", "gold", "lime", "cyan", "magenta", "orange", "pink", "yellow", "red", "blue", "green", "violet", "turquoise", "coral", "salmon", "orchid", "lightseagreen", "tomato", "springgreen", "deepskyblue"];
         let currentColorIndex = 0; // Track current background color
         // Background image
         let backgroundImage = new Image();
@@ -343,8 +348,8 @@ permalink: /snake1
                 snake[snake.length] = {x: snake[0].x, y: snake[0].y};
                 altScore(++score);
                 
-                // Change background color when food is eaten
-                currentColorIndex = (currentColorIndex + 1) % backgroundColors.length;
+                // Change background color to random when food is eaten
+                currentColorIndex = Math.floor(Math.random() * backgroundColors.length);
                 
                 addFood();
                 
