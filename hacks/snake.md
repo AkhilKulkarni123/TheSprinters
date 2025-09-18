@@ -1,7 +1,7 @@
 ---
-layout: opencs
+layout: post
 title: Snake Game
-permalink: /snake
+permalink: /snake1
 ---
 
 <style>
