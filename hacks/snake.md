@@ -17,7 +17,18 @@ permalink: /snake
         display: none;
         border-style: solid;
         border-width: 10px;
-        border-color: #FFFFFF;
+        border-color: #FF0000;  /* Changed to red */
+        box-shadow: 0 0 20px #FF0000, 0 0 40px #FF0000, 0 0 60px #FF0000;
+        animation: borderGlow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes borderGlow {
+        from {
+            box-shadow: 0 0 20px #FF0000, 0 0 40px #FF0000, 0 0 60px #FF0000;
+        }
+        to {
+            box-shadow: 0 0 30px #FF6666, 0 0 60px #FF6666, 0 0 90px #FF6666;
+        }
     }
     canvas:focus{
         outline: none;
@@ -68,19 +79,22 @@ permalink: /snake
     }
 </style>
 
-<h2>Snake</h2>
+<h2>Monkey Snake 🐵🍌</h2>
 <div class="container">
     <p class="fs-4">Score: <span id="score_value">0</span></p>
     <div class="container bg-secondary" style="text-align:center;">
         <!-- Main Menu -->
         <div id="menu" class="py-4 text-light">
-            <p>Welcome to Snake, press <span style="background-color: #FFFFFF; color: #000000">space</span> to begin</p>
+            <p>Welcome to Monkey Snake, press <span style="background-color: #FFFFFF; color: #000000">space</span> to begin</p>
+            <p>Use <span style="background-color: #FFFFFF; color: #000000">arrow keys</span> or <span style="background-color: #FFFFFF; color: #000000">WASD</span> to move</p>
+            <p style="color: #ff6b6b;">⚠️ Deadly obstacles appear at score 3!</p>
             <a id="new_game" class="link-alert">new game</a>
             <a id="setting_menu" class="link-alert">settings</a>
         </div>
         <!-- Game Over -->
         <div id="gameover" class="py-4 text-light">
             <p>Game Over, press <span style="background-color: #FFFFFF; color: #000000">space</span> to try again</p>
+            <p>Use <span style="background-color: #FFFFFF; color: #000000">arrow keys</span> or <span style="background-color: #FFFFFF; color: #000000">WASD</span> to move</p>
             <a id="new_game1" class="link-alert">new game</a>
             <a id="setting_menu1" class="link-alert">settings</a>
         </div>
@@ -143,6 +157,13 @@ permalink: /snake
         let food = {x: 0, y: 0};
         let score;
         let wall;
+        let obstacles = []; // New: Array to store obstacles
+        let backgroundColors = ["royalblue", "purple", "darkgreen", "maroon", "darkslategray", "midnightblue", "indigo", "darkred", "forestgreen", "darkorange"];
+        let currentColorIndex = 0; // Track current background color
+        // Background image
+        let backgroundImage = new Image();
+        backgroundImage.src = 'images/junglebg.png';
+
         /* Display Control */
         /////////////////////////////////////////////////////////////
         // 0 for the game
@@ -172,6 +193,7 @@ permalink: /snake
                     break;
             }
         }
+
         /* Actions and Events  */
         /////////////////////////////////////////////////////////////
         window.onload = function(){
@@ -210,6 +232,54 @@ permalink: /snake
                     newGame();
             }, true);
         }
+
+        /* Add Obstacles when score reaches 30 */
+        /////////////////////////////////////////////////////////////
+        let addObstacle = function(){
+            let obstacle = {
+                x: Math.floor(Math.random() * ((canvas.width / BLOCK) - 1)),
+                y: Math.floor(Math.random() * ((canvas.height / BLOCK) - 1))
+            };
+            
+            // Make sure obstacle doesn't spawn on snake or food
+            let validPosition = false;
+            let attempts = 0;
+            while (!validPosition && attempts < 50) {
+                validPosition = true;
+                
+                // Check against snake
+                for(let i = 0; i < snake.length; i++){
+                    if(checkBlock(obstacle.x, obstacle.y, snake[i].x, snake[i].y)){
+                        validPosition = false;
+                        break;
+                    }
+                }
+                
+                // Check against food
+                if(checkBlock(obstacle.x, obstacle.y, food.x, food.y)){
+                    validPosition = false;
+                }
+                
+                // Check against existing obstacles
+                for(let i = 0; i < obstacles.length; i++){
+                    if(checkBlock(obstacle.x, obstacle.y, obstacles[i].x, obstacles[i].y)){
+                        validPosition = false;
+                        break;
+                    }
+                }
+                
+                if(!validPosition){
+                    obstacle.x = Math.floor(Math.random() * ((canvas.width / BLOCK) - 1));
+                    obstacle.y = Math.floor(Math.random() * ((canvas.height / BLOCK) - 1));
+                }
+                attempts++;
+            }
+            
+            if(validPosition){
+                obstacles.push(obstacle);
+            }
+        }
+
         /* Snake is on the Go (Driver Function)  */
         /////////////////////////////////////////////////////////////
         let mainLoop = function(){
@@ -225,6 +295,7 @@ permalink: /snake
             }
             snake.pop(); // tail is removed
             snake.unshift({x: _x, y: _y}); // head is new in new position/orientation
+            
             // Wall Checker
             if(wall === 1){
                 // Wall on, Game over test
@@ -249,6 +320,7 @@ permalink: /snake
                     }
                 }
             }
+            
             // Snake vs Snake checker
             for(let i = 1; i < snake.length; i++){
                 // Game over test
@@ -257,28 +329,67 @@ permalink: /snake
                     return;
                 }
             }
+            
+            // NEW: Snake vs Obstacles checker
+            for(let i = 0; i < obstacles.length; i++){
+                if(checkBlock(snake[0].x, snake[0].y, obstacles[i].x, obstacles[i].y)){
+                    showScreen(SCREEN_GAME_OVER);
+                    return;
+                }
+            }
+            
             // Snake eats food checker
             if(checkBlock(snake[0].x, snake[0].y, food.x, food.y)){
                 snake[snake.length] = {x: snake[0].x, y: snake[0].y};
                 altScore(++score);
+                
+                // Change background color when food is eaten
+                currentColorIndex = (currentColorIndex + 1) % backgroundColors.length;
+                
                 addFood();
-                activeDot(food.x, food.y);
+                
+                // NEW: Add obstacles when score reaches 3 and every 2 points after
+                if(score >= 3 && (score - 3) % 2 === 0){
+                    addObstacle();
+                }
             }
+            
             // Repaint canvas
             ctx.beginPath();
-            ctx.fillStyle = "royalblue";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Draw jungle background image (with fallback to cycling colors)
+            if (backgroundImage.complete && backgroundImage.naturalHeight !== 0) {
+                // Tint the background image with current color
+                ctx.globalAlpha = 0.7;
+                ctx.fillStyle = backgroundColors[currentColorIndex];
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.globalAlpha = 0.6;
+                ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+                ctx.globalAlpha = 1.0;
+            } else {
+                // Fallback to cycling colors if image not loaded
+                ctx.fillStyle = backgroundColors[currentColorIndex];
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
             // Paint snake
             for(let i = 0; i < snake.length; i++){
-                activeDot(snake[i].x, snake[i].y);
+                drawMonkey(snake[i].x, snake[i].y);
             }
+            
             // Paint food
-            activeDot(food.x, food.y);
+            drawBanana(food.x, food.y);
+            
+            // NEW: Paint obstacles
+            for(let i = 0; i < obstacles.length; i++){
+                drawObstacle(obstacles[i].x, obstacles[i].y);
+            }
+            
             // Debug
             //document.getElementById("debug").innerHTML = snake_dir + " " + snake_next_dir + " " + snake[0].x + " " + snake[0].y;
             // Recursive call after speed delay, déjà vu
             setTimeout(mainLoop, snake_speed);
         }
+
         /* New Game setup */
         /////////////////////////////////////////////////////////////
         let newGame = function(){
@@ -292,6 +403,10 @@ permalink: /snake
             snake = [];
             snake.push({x: 0, y: 15});
             snake_next_dir = 1;
+            // Clear obstacles for new game
+            obstacles = [];
+            // Reset background color
+            currentColorIndex = 0;
             // food on canvas
             addFood();
             // activate canvas event
@@ -300,56 +415,91 @@ permalink: /snake
             }
             mainLoop();
         }
+
         /* Key Inputs and Actions */
         /////////////////////////////////////////////////////////////
         let changeDir = function(key){
             // test key and switch direction
             switch(key) {
                 case 37:    // left arrow
+                case 65:    // A key
                     if (snake_dir !== 1)    // not right
                         snake_next_dir = 3; // then switch left
                     break;
                 case 38:    // up arrow
+                case 87:    // W key
                     if (snake_dir !== 2)    // not down
                         snake_next_dir = 0; // then switch up
                     break;
                 case 39:    // right arrow
+                case 68:    // D key
                     if (snake_dir !== 3)    // not left
                         snake_next_dir = 1; // then switch right
                     break;
                 case 40:    // down arrow
+                case 83:    // S key
                     if (snake_dir !== 0)    // not up
                         snake_next_dir = 2; // then switch down
                     break;
             }
         }
-        /* Dot for Food or Snake part */
+
+        /* Draw Monkey Emoji for Snake */
         /////////////////////////////////////////////////////////////
-        let activeDot = function(x, y){
-            ctx.fillStyle = "#FFFFFF";
-            ctx.fillRect(x * BLOCK, y * BLOCK, BLOCK, BLOCK);
+        let drawMonkey = function(x, y){
+            ctx.font = "10px Arial";
+            ctx.fillText("🐵", x * BLOCK, (y * BLOCK) + BLOCK);
         }
+
+        /* Draw Banana Emoji for Food */
+        /////////////////////////////////////////////////////////////
+        let drawBanana = function(x, y){
+            ctx.font = "10px Arial";
+            ctx.fillText("🍌", x * BLOCK, (y * BLOCK) + BLOCK);
+        }
+
+        /* NEW: Draw Obstacle (Rock) */
+        /////////////////////////////////////////////////////////////
+        let drawObstacle = function(x, y){
+            ctx.font = "10px Arial";
+            ctx.fillText("🪨", x * BLOCK, (y * BLOCK) + BLOCK);
+        }
+
         /* Random food placement */
         /////////////////////////////////////////////////////////////
         let addFood = function(){
             food.x = Math.floor(Math.random() * ((canvas.width / BLOCK) - 1));
             food.y = Math.floor(Math.random() * ((canvas.height / BLOCK) - 1));
+            
+            // Check against snake
             for(let i = 0; i < snake.length; i++){
                 if(checkBlock(food.x, food.y, snake[i].x, snake[i].y)){
                     addFood();
+                    return;
+                }
+            }
+            
+            // NEW: Check against obstacles
+            for(let i = 0; i < obstacles.length; i++){
+                if(checkBlock(food.x, food.y, obstacles[i].x, obstacles[i].y)){
+                    addFood();
+                    return;
                 }
             }
         }
+
         /* Collision Detection */
         /////////////////////////////////////////////////////////////
         let checkBlock = function(x, y, _x, _y){
             return (x === _x && y === _y);
         }
+
         /* Update Score */
         /////////////////////////////////////////////////////////////
         let altScore = function(score_val){
             ele_score.innerHTML = String(score_val);
         }
+
         /////////////////////////////////////////////////////////////
         // Change the snake speed...
         // 150 = slow
@@ -358,11 +508,12 @@ permalink: /snake
         let setSnakeSpeed = function(speed_value){
             snake_speed = speed_value;
         }
+
         /////////////////////////////////////////////////////////////
         let setWall = function(wall_value){
             wall = wall_value;
-            if(wall === 0){screen_snake.style.borderColor = "#606060";}
-            if(wall === 1){screen_snake.style.borderColor = "#FFFFFF";}
+            if(wall === 0){screen_snake.style.borderColor = "#FF0000";} // Changed to red
+            if(wall === 1){screen_snake.style.borderColor = "#FF0000";} // Changed to red
         }
     })();
 </script>
