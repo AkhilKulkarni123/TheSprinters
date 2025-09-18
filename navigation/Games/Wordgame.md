@@ -1,7 +1,7 @@
 ---
-layout: opencs
-title: Word Game
-permalink: /wordgame
+layout: post
+title: Word-Game
+permalink: /WordGame
 ---
 
 <html lang="en">
