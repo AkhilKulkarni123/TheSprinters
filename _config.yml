@@ -124,6 +124,7 @@ minima:
     - navigation/games/Hangman.md
     - navigation/Games/Wordgame.md
     - navigation/Games/API.md
-    - navigation/Games/rps.md
-    - navigation/Games/Snake.md
+    - navigation/games/rps.md
+    - navigation/games/Snake.md
+    - navigation/Games/blackjack.md
 
