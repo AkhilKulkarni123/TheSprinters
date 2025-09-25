@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Sprint 2 - Introduction to Python Interactive
-description:  Lesson for python basics thru a sim
+title: Sprint 2 - Introduction to Python for RNG Interactive
+description:  Lesson for python For RNG
 breadcrumbs: True
 permalink: /JSRandomNumDemo
 ---
