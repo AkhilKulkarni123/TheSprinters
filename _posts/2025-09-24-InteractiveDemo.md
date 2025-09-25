@@ -3,9 +3,8 @@ layout: post
 title: Sprint 2 - Introduction to Python Interactive
 description:  Lesson for python basics thru a sim
 breadcrumbs: True
-permalink: /InteractiveDemo
+permalink: /JSRandomNumDemo
 ---
-
 
 <html lang="en">
 <head>
@@ -13,47 +12,59 @@ permalink: /InteractiveDemo
   <title>Learn About Random Module & RNG</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: "Segoe UI", Tahoma, sans-serif;
       margin: 20px;
-      background: #f9f9f9;
-      color: #333;
+      background: #1e1e2f; /* dark background */
+      color: #e4e4e4;      /* light text */
     }
     h1 {
       text-align: center;
-      color: #444;
+      color: #ffb347; /* orange accent */
     }
     .section {
-      background: #fff;
-      padding: 15px;
-      margin: 15px 0;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      background: #2c2c3c;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    h2 {
+      color: #50fa7b; /* teal accent */
     }
     button {
       padding: 8px 15px;
-      margin-top: 8px;
+      margin-top: 10px;
       border: none;
-      border-radius: 4px;
-      background: #0078d7;
+      border-radius: 5px;
+      background: #ff7f50; /* coral/orange */
       color: #fff;
+      font-weight: bold;
       cursor: pointer;
+      transition: background 0.2s;
     }
     button:hover {
-      background: #005fa3;
+      background: #ff5c1a;
     }
     input {
       padding: 5px;
+      margin: 5px;
       width: 70px;
+      border-radius: 5px;
+      border: 1px solid #555;
+      background: #1e1e2f;
+      color: #e4e4e4;
+      text-align: center;
     }
-    #output {
+    #output-random, #output-randint, #output-uniform {
       font-weight: bold;
-      color: #0078d7;
-      margin-top: 10px;
+      color: #50fa7b;
+      margin-top: 12px;
     }
     code {
-      background: #eee;
-      padding: 2px 4px;
+      background: #444;
+      padding: 3px 6px;
       border-radius: 4px;
+      color: #ffb347;
     }
   </style>
 </head>
@@ -70,7 +81,6 @@ permalink: /InteractiveDemo
       <li><code>uniform(a, b)</code>: Returns a float between <code>a</code> and <code>b</code>.</li>
       <li><code>choice(seq)</code>: Returns a random element from a sequence.</li>
     </ul>
-    <p>Below, you can try out RNGs (Random Number Generators) in your browser! These mimic the behavior of Python’s functions using JavaScript.</p>
   </div>
 
   <div class="section">
@@ -80,7 +90,7 @@ permalink: /InteractiveDemo
   </div>
 
   <div class="section">
-    <h2>Generate Random Integer (like <code>randint(a, b)</code>)</h2>
+    <h2>Generate Random Integer (<code>randint(a, b)</code>)</h2>
     <label>Min: <input type="number" id="min" value="1"></label>
     <label>Max: <input type="number" id="max" value="10"></label>
     <br>
@@ -89,7 +99,7 @@ permalink: /InteractiveDemo
   </div>
 
   <div class="section">
-    <h2>Generate Random Float in Range (like <code>uniform(a, b)</code>)</h2>
+    <h2>Generate Random Float in Range (<code>uniform(a, b)</code>)</h2>
     <label>Min: <input type="number" id="minf" value="0"></label>
     <label>Max: <input type="number" id="maxf" value="1"></label>
     <br>
@@ -107,7 +117,7 @@ permalink: /InteractiveDemo
       const min = parseInt(document.getElementById("min").value);
       const max = parseInt(document.getElementById("max").value);
       if (min > max) {
-        document.getElementById("output-randint").innerText = "Error: Min should be ≤ Max";
+        document.getElementById("output-randint").innerText = "Error: Min ≤ Max required";
         return;
       }
       const num = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -118,7 +128,7 @@ permalink: /InteractiveDemo
       const min = parseFloat(document.getElementById("minf").value);
       const max = parseFloat(document.getElementById("maxf").value);
       if (min > max) {
-        document.getElementById("output-uniform").innerText = "Error: Min should be ≤ Max";
+        document.getElementById("output-uniform").innerText = "Error: Min ≤ Max required";
         return;
       }
       const num = Math.random() * (max - min) + min;
